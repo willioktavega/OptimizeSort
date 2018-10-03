@@ -1,23 +1,56 @@
-import time
-import csv
+import os
 
-# in_file = 'input/age700.txt'
-# out_file = 'output/result_age.txt'
-def compute_sort(in_file, out_file):
-    start_time = time.time()
-    dictData = {}
-    for i in range(100):
-        dictData[i] = []
+def set_or_get_tmp(out_file):
+    # split path and filename
+    split_path_files = os.path.split(os.path.abspath(out_file))
+    tmp_merge = "{path}/tmp".format(path=split_path_files[0])
+    if not os.path.exists(tmp_merge):
+        os.makedirs(tmp_merge)
 
-    with open(in_file, 'r') as f, open(out_file, 'w') as o_file:
-        writer = csv.writer(o_file)
-        reader = csv.reader(f)
+    return tmp_merge
 
-        for i, row in enumerate(reader):
-            dictData[int(row[0])].append(int(row[0]))
 
-        for i in dictData:
-            if dictData[i] != []:
-                [writer.writerow([j]) for j in dictData[i]]
+def mapping(in_file, out_file):
+    tmp_merge = set_or_get_tmp(out_file)
 
-    print("--- %s seconds ---" % (time.time() - start_time))
+    # each number put in its file with has same name
+    # ex: number 1 put in file with name 1.txt
+    with open(in_file, 'r') as f_in:
+        for each in f_in:
+            if int(each) < 10:
+                with open("{path}/0{part}.txt".format(path=tmp_merge, part=each.strip()), 'ab') as f_out:
+                    f_out.write(each.strip())
+                    f_out.write('\n')
+            else:
+                with open("{path}/{part}.txt".format(path=tmp_merge, part=each.strip()), 'ab') as f_out:
+                    f_out.write(each.strip())
+                    f_out.write('\n')
+
+def compute_sort(out_file):
+    tmp_merge = set_or_get_tmp(out_file)
+    list_tmp_merge = os.listdir(tmp_merge)
+
+    # merge all temporary file and sort by name file
+    with open(out_file, 'w') as f_merge:
+        for file in sorted(list_tmp_merge):
+            with open('{path}/{name}'.format(path=tmp_merge, name=file), 'rb') as f_tmp:
+                for number in f_tmp:
+                    f_merge.write(number)
+
+def remove_tmp(out_file):
+    tmp_merge = set_or_get_tmp(out_file)
+    list_tmp_merge = os.listdir(tmp_merge)
+
+    # remove temporary directory / files
+    try:
+        for file in list_tmp_merge:
+            os.remove('{path}/{name}'.format(path=tmp_merge, name=file))
+
+        os.rmdir(tmp_merge)
+    except Exception:
+        pass
+
+# if __name__ == '__main__':
+#     mapping('input/test.txt', 'output/merge.txt')
+#     compute_sort('output/merge.txt')
+#     remove_tmp('output/merge.txt')

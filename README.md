@@ -25,3 +25,11 @@ Example:
 ├── output
 │   ├── agetest.txt
 ```
+
+## Update:
+
+##### Sort schema changed
+
+* Mapping each number to temporary files (ex: 1 mapping to 01.txt, 10 mapping to 10.txt) 
+* Sort temporary files
+* Merge sorted temporary files
